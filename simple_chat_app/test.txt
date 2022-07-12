@@ -1,0 +1,228 @@
+test case 1
+
+• There are three clients
+
+• Client 1 goes offline
+
+• The other two clients send messages to client 1
+
+
+(base) huliping@koakazas-MacBook-Pro 4119PA % python ChatApp.py -c x 127.0.0.1 3000 6002
+[Welcome, You are registered.]
+[Client table updated.]
+[Client table updated.]
+[Client table updated.]
+
+dereg x
+[You are Offline. Bye.]
+
+reg x
+[You have messages]
+y: 03/27/2022 18:00:58 hi!
+z: 03/27/2022 18:01:07 hello!!
+[client table updated.]
+
+
+(base) huliping@koakazas-MacBook-Pro 4119PA % python ChatApp.py -c y 127.0.0.1 3000 6002
+[Welcome, You are registered.]
+[Client table updated.]
+[Client table updated.]
+[Client table updated.]
+[client table updated.]
+
+send x hi!
+[Messages received by the server and saved. ]
+
+[client table updated.]
+
+(base) huliping@koakazas-MacBook-Pro 4119PA % python ChatApp.py -c z 127.0.0.1 3000 6002
+[Welcome, You are registered.]
+[Client table updated.]
+[Client table updated.]
+[Client table updated.]
+[client table updated.]
+
+send x hello!!
+[Messages received by the server and saved. ]
+
+[client table updated.]
+
+
+test case 2:
+• There are three clients
+
+• Client 1 goes offline
+
+• Client 2 sends channel message : Welcome to Channel
+
+• Client 2 sends message to client 1 : Hello
+
+• Client 3 sends message to client 1 : Hello!!
+
+
+(base) huliping@koakazas-MacBook-Pro 4119PA % python ChatApp.py -c x 127.0.0.1 3000 6002
+[Welcome, You are registered.]
+[Client table updated.]
+[Client table updated.]
+[Client table updated.]
+dereg x
+[You are Offline. Bye.]
+reg x
+[You have messages]
+Channel_Message y: 03/27/2022 18:09:03 Welcome to Channel
+y: 03/27/2022 18:09:25 Hello
+z: 03/27/2022 18:09:33 Hello!!!
+[client table updated.]
+
+(base) huliping@koakazas-MacBook-Pro 4119PA % python ChatApp.py -c y 127.0.0.1 3000 6002
+[Welcome, You are registered.]
+[Client table updated.]
+[Client table updated.]
+[Client table updated.]
+[client table updated.]
+
+send_all Welcome to Channel
+[Message received by Server.]
+
+send x Hello
+[No ACK from x message sent to server.]
+[Messages received by the server and saved. ]
+[client table updated.]
+
+
+
+
+(base) huliping@koakazas-MacBook-Pro 4119PA % python ChatApp.py -c z 127.0.0.1 3000 6002
+[Welcome, You are registered.]
+[Client table updated.]
+[Client table updated.]
+[Client table updated.]
+[client table updated.]
+Channel_Message y: Welcome to Channel
+send x Hello!!!
+[No ACK from x message sent to server.]
+[Messages received by the server and saved. ]
+[client table updated.]
+
+Test-case 3:
+1. start server
+
+2. start client x(the table should be sent from server to x)
+
+3. start client y(the table should be sent from server to x and y)
+
+4. start client z(the table should be sent from server to x and y and z)
+
+5. chat x -> y, y->z, ... , x ->z (All combinations)
+
+6. dereg x (the table should be sent to y, z. x should receive ’ack’)
+
+7. chat y->x (this should fail and message should be sent to server, and message has to be saved for x in the server)
+
+8. chat z->x (same as above)
+
+9. reg x (messages should be sent from server to x, x’s status has to be broadcasted to all the other clients)
+
+10. x, y, z : exit
+
+(base) huliping@koakazas-MacBook-Pro 4119PA % python ChatApp.py -c x 127.0.0.1 3000 6002
+[Welcome, You are registered.]
+[Client table updated.]
+[Client table updated.]
+[Client table updated.]
+send y hi
+[Message received by y]
+send z hello
+[Message received by z]
+y : yes
+y : no
+z : ?
+z : !
+send x hi
+x : hi
+[Message received by x]
+dereg x
+[You are Offline. Bye.]
+reg x
+[You have messages]
+y: 03/27/2022 18:13:15 where are you?
+z: 03/27/2022 18:13:24 how are you x?
+[client table updated.]
+^Cclosing a client
+
+
+(base) huliping@koakazas-MacBook-Pro 4119PA % python ChatApp.py -c y 127.0.0.1 3000 6002
+[Welcome, You are registered.]
+[Client table updated.]
+[Client table updated.]
+[Client table updated.]
+x : hi
+send x yes
+[Message received by x]
+send x no
+[Message received by x]
+send y hi
+y : hi
+[Message received by y]
+[client table updated.]
+send x where are you?
+[No ACK from x message sent to server.]
+[Messages received by the server and saved. ]
+
+[client table updated.]
+^Cclosing a client
+
+(base) huliping@koakazas-MacBook-Pro 4119PA % python ChatApp.py -c z 127.0.0.1 3000 6002
+[Welcome, You are registered.]
+[Client table updated.]
+[Client table updated.]
+[Client table updated.]
+x : hello
+send x ?
+[Message received by x]
+send x !
+[Message received by x]
+send z hi
+z : hi
+[Message received by z]
+[client table updated.]
+send x how are you x?
+[No ACK from x message sent to server.]
+[Messages received by the server and saved. ]
+
+[client table updated.]
+^Cclosing a client
+
+
+Test-case 4:
+1. start server
+
+2. start client x (the table should be sent from server to x )
+
+3. start client y (the table should be sent from server to x and y)
+
+4. dereg y
+
+5. server exit
+
+6. send message x-> y (will fail with both y and server, so should make 5 attempts and exit)
+
+
+(base) huliping@koakazas-MacBook-Pro 4119PA % python ChatApp.py -c x 127.0.0.1 3000 6002
+[Welcome, You are registered.]
+[Client table updated.]
+[Client table updated.]
+[client table updated.]
+send y hellp
+[No ACK from y message sent to server.]
+[Server not responding]
+[Exiting]
+(base) huliping@koakazas-MacBook-Pro 4119PA %
+
+
+(base) huliping@koakazas-MacBook-Pro 4119PA % python ChatApp.py -c y 127.0.0.1 3000 6002
+[Welcome, You are registered.]
+[Client table updated.]
+[Client table updated.]
+dereg y
+[You are Offline. Bye.]
